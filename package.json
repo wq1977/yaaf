@@ -1,8 +1,11 @@
 {
   "name": "yaaf",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Yet Another Api Framework",
   "license": "MIT",
+  "scripts": {
+    "patch": "yarn version --new-version patch"
+  },
   "dependencies": {
     "config": "^3.0.1",
     "cron": "^1.6.0",
