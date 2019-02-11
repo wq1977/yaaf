@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "koa-server-http-proxy": "^0.1.0",
+    "raw-body": "^2.3.3",
+    "uuid": "^3.3.2"
+  }
+}

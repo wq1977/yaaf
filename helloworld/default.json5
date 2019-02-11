@@ -1,0 +1,12 @@
+{
+    log4js:{
+        console: true
+    },
+    gateway:{
+        services:[],
+        port: 9301,
+    },
+    redis:{
+        url:''
+    }
+}

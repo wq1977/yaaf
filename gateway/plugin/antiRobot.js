@@ -1,0 +1,55 @@
+const config = require('../../lib/config');
+const redis = require('../../lib/redis')(config.redis.url);
+const {response} = require('../../lib/func');
+const errorCode = require('../../lib/errorCode');
+
+module.exports = async(ctx, next)=>{
+    const log = ctx.log;
+    // 如果没有带 session 消息头的消息将被认为是 机器人发送的消息 
+    if (!ctx.session) {
+        ctx.status = 403;
+        log.error(ctx.session,'robot-req-no-session',ctx.request.ip, ctx.req.url);
+        return;
+    }
+    // 如果带的 session 不是有效的 session， 将被认为是 session 超时 或者是机器人发送的消息
+    const createat = await redis.hget(`session-${ctx.session}`, 'createat');
+    if (!createat) {
+        ctx.body = response(errorCode.sessionTimeout);
+        log.error(ctx.session,'robot-req-session-timeout', ctx.req.url, ctx.session);
+        return;        
+    }
+    // 如果发送的 session 太快，将被认为是机器人发送的消息
+    if (!config.common.dev){
+        const duration = new Date().getTime() - createat;
+        if ((ctx.req.url === '/code') && (duration < 1000)) {
+            ctx.status = 403;
+            log.error(ctx.session,'robot-code-too-fast',ctx.request.ip, ctx.req.url);
+            return;
+        }    
+    }
+
+    // 如果未登录就请求api，将被认为是机器人发送的消息
+    const login = await redis.hget(`session-${ctx.session}`, 'login');
+    if (("role" in config.tc[ctx.req.url]) && (login != 1)) {
+        ctx.body = response(errorCode.sessionTimeout);
+        log.error(ctx.session,'api-need-login',ctx.request.ip, ctx.req.url);
+        return;
+    }    
+
+    const userrole = await redis.hget(`session-${ctx.session}`, 'role');
+    if (config.tc[ctx.req.url].role && (!(config.tc[ctx.req.url].role & userrole))){
+        ctx.status=403;
+        log.error(ctx.session,'api-need-role',ctx.request.ip, ctx.req.url, config.tc[ctx.req.url].role, userrole);
+        return;
+    }
+
+    //TODO 如果发送的 session 所代表的指纹 被认为是 恶意的指纹，将被认为是 机器人发送的消息
+
+    if ("role" in config.tc[ctx.req.url]) {
+        //如果通过了检查，就重制session的超时时间
+        await redis.expire(`session-${ctx.session}`, config.common.expire.session);
+    }
+
+
+    await next();
+}

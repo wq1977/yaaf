@@ -13,6 +13,7 @@ class Task{
         this.api_port = module in config ? config[module].port || 80 : 0;
         this._module = module;
         this.log = require('./lib/log').get(module);
+        this.use = this.api.use.bind(this.api);
         this.info = this.log.info.bind(this.log);        
         this.error = this.log.error.bind(this.log);        
         this.config = config;
@@ -28,7 +29,7 @@ class Task{
             await next();
         });
         this.api.use(logRequest);
-        this.api.start = ()=>{
+        this.start = this.api.start = ()=>{
             this.api.use(this.router.routes()).use(this.router.allowedMethods());
             this.api.listen(this.api_port, '127.0.0.1');
             this.info(`service ${module} listenning at http://127.0.0.1:${this.api_port}`)
