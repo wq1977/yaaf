@@ -3,11 +3,13 @@ const mysql = require('../lib/mysql')(config.mysql.url);
 const redis = require('../lib/redis')(config.redis.url);
 const log = require('../lib/log').get('unittest');
 const func = require('../lib/func');
+const errorCode = require('../lib/errorCode');
 const ctx={
     db:mysql,
     cache:redis,
     log,
-    func
+    func,
+    errorCode
 }
 const mockdbname = 'db_'+Math.round(Math.random()*10000);
 ctx.db.init=async function(){    
