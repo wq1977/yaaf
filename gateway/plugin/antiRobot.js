@@ -19,33 +19,32 @@ module.exports = async(ctx, next)=>{
         return;        
     }
     // 如果发送的 session 太快，将被认为是机器人发送的消息
-    if (!config.common.dev){
-        const duration = new Date().getTime() - createat;
-        if ((ctx.req.url === '/code') && (duration < 1000)) {
-            ctx.status = 403;
-            log.error(ctx.session,'robot-code-too-fast',ctx.request.ip, ctx.req.url);
-            return;
-        }    
-    }
+    const duration = new Date().getTime() - createat;
+    if ((ctx.req.url === '/code') && (duration < 1000)) {
+        ctx.status = 403;
+        log.error(ctx.session,'robot-code-too-fast',ctx.request.ip, ctx.req.url);
+        return;
+    }    
 
     // 如果未登录就请求api，将被认为是机器人发送的消息
     const login = await redis.hget(`session-${ctx.session}`, 'login');
-    if (("role" in config.tc[ctx.req.url]) && (login != 1)) {
+    let urlkey = ctx.req.url in config.tc ? ctx.req.url : 'default';
+    if (("role" in config.tc[urlkey]) && (login != 1)) {
         ctx.body = response(errorCode.sessionTimeout);
         log.error(ctx.session,'api-need-login',ctx.request.ip, ctx.req.url);
         return;
     }    
 
     const userrole = await redis.hget(`session-${ctx.session}`, 'role');
-    if (config.tc[ctx.req.url].role && (!(config.tc[ctx.req.url].role & userrole))){
+    if (config.tc[urlkey].role && (!(config.tc[urlkey].role & userrole))){
         ctx.status=403;
-        log.error(ctx.session,'api-need-role',ctx.request.ip, ctx.req.url, config.tc[ctx.req.url].role, userrole);
+        log.error(ctx.session,'api-need-role',ctx.request.ip, ctx.req.url, config.tc[urlkey].role, userrole);
         return;
     }
 
     //TODO 如果发送的 session 所代表的指纹 被认为是 恶意的指纹，将被认为是 机器人发送的消息
 
-    if ("role" in config.tc[ctx.req.url]) {
+    if ("role" in config.tc[urlkey]) {
         //如果通过了检查，就重制session的超时时间
         await redis.expire(`session-${ctx.session}`, config.common.expire.session);
     }
