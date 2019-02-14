@@ -20,9 +20,10 @@ module.exports = async(ctx, next)=>{
     }
     // 如果发送的 session 太快，将被认为是机器人发送的消息
     const duration = new Date().getTime() - createat;
-    if ((ctx.req.url === '/code') && (duration < 1000)) {
+    const delta = 'reqDelta' in config.antirobot ? config.antirobot.reqDelta : 1000;
+    if ((ctx.req.url === '/code') && (duration < delta)) {
         ctx.status = 403;
-        log.error(ctx.session,'robot-code-too-fast',ctx.request.ip, ctx.req.url);
+        log.error(ctx.session,'robot-code-too-fast',ctx.request.ip, ctx.req.url, duration, delta);
         return;
     }    
 

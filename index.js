@@ -31,6 +31,8 @@ class Task{
             ctx.config = config;
             if ('x-session' in ctx.req.headers) {
                 ctx.session = ctx.req.headers['x-session'];
+                this.info = this.log.info.bind(this.log, ctx.session);        
+                this.error = this.log.error.bind(this.log, ctx.session);                
             }
             ctx.errorCode =errorCode;
             ctx.func = func;
