@@ -22,10 +22,11 @@ ctx.db.init=async function(){
     }
     await mysql.query(`create database ${mockdbname}`);
     await mysql.query(`use ${mockdbname}`);
-    await mysql.query('SET @@global.time_zone = "+00:00";')
-    await mysql.query('SET @@session.time_zone = "+00:00";')
+    await mysql.query('SET @@global.time_zone = "+08:00";')
+    await mysql.query('SET @@session.time_zone = "+08:00";')
     for (let table of tables) {
         await mysql.query(table.create);
+        await mysql.query(table.truncate);
     }
 }
 
