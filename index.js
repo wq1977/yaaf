@@ -29,10 +29,12 @@ class Task{
         this.api.use(async (ctx, next) => {
             ctx.log = this.log;
             ctx.config = config;
-            if ('x-session' in ctx.req.headers) {
+            ctx.info = this.log.info.bind(this.log,'no-session');        
+            ctx.error = this.log.error.bind(this.log,'no-session');                
+        if ('x-session' in ctx.req.headers) {
                 ctx.session = ctx.req.headers['x-session'];
-                this.info = this.log.info.bind(this.log, ctx.session);        
-                this.error = this.log.error.bind(this.log, ctx.session);                
+                ctx.info = this.log.info.bind(this.log, ctx.session);        
+                ctx.error = this.log.error.bind(this.log, ctx.session);                
             }
             ctx.errorCode =errorCode;
             ctx.func = func;
