@@ -38,6 +38,10 @@ class Task{
             ctx.cache=redis;
             await next();
         });
+        this.db = mysql;
+        this.cache = redis;
+        this.func=func;
+        this.errorCode = errorCode;
         this.api.use(logRequest);
         this.api.use(appendSessionData);
         this.start = this.api.start = ()=>{
