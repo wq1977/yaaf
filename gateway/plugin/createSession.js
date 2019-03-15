@@ -40,9 +40,7 @@ module.exports = async(ctx, next)=>{
         await redis.expire(`session-${session}`, 180); //三分钟内没有登录的session将会过期
         ctx.session = session;
         // 返回创建的 session
-        ctx.body = response(0, {
-            session
-        })
+        ctx.body = response(0, session)
         log.info(session,'create-session','succ');
         return;
     } else {

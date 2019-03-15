@@ -5,7 +5,7 @@ const task = require('..')('gateway', {
 const proxy = require('koa-server-http-proxy');
 
 const eldstart = task.start;
-task.start = (()=>{
+task.start = ((addr)=>{
     (task.config.gateway.services || []).map((service)=>{
         task.api.use(proxy(service[0], { 
             target: service[1], 
@@ -30,7 +30,7 @@ task.start = (()=>{
             },
         }));
     })
-    eldstart();
+    eldstart(addr);
 }).bind(task);
 
 module.exports = task

@@ -48,10 +48,11 @@ class Task{
         this.errorCode = errorCode;
         this.api.use(logRequest);
         this.api.use(appendSessionData);
-        this.start = this.api.start = ()=>{
+        this.start = this.api.start = (addr)=>{
             this.api.use(this.router.routes()).use(this.router.allowedMethods());
-            this.api.listen(this.api_port, '127.0.0.1');
-            this.info(`service ${module} listenning at http://127.0.0.1:${this.api_port}`)
+            const bindaddr = addr || '127.0.0.1'
+            this.api.listen(this.api_port, bindaddr);
+            this.info(`service ${module} listenning at http://${bindaddr}:${this.api_port}`)
         }
 
         const Router = require('koa-router');
