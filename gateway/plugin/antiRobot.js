@@ -7,7 +7,7 @@ module.exports = async(ctx, next)=>{
     const log = ctx.log;
     // 如果没有带 session 消息头的消息将被认为是 机器人发送的消息 
     if (!ctx.session) {
-        ctx.status = 403;
+        ctx.status = 401;
         log.error(ctx.session,'robot-req-no-session',ctx.request.ip, ctx.req.url);
         return;
     }
