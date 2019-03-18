@@ -24,7 +24,7 @@ class Task{
         this.error = this.log.error.bind(this.log);        
         this.config = config;
         if (options.parseBody) {
-            this.api.use(require('koa-body')());
+            this.api.use(require('koa-body')({ multipart: true }));
         }
         this.api.use(async (ctx, next) => {
             ctx.log = this.log;
@@ -85,10 +85,14 @@ async function appendSessionData(ctx, next) {
 }
 
 async function logRequest(ctx, next) {
+    const isStream = require('is-stream');
     ctx.log.info(ctx.session, "req", ctx.req.url, ctx.req.method, ctx.request.headers['x-real-ip']); 
     await next();
-    ctx.set('Content-Type', 'application/json');
-    ctx.log.info(ctx.session, "rsp", ctx.status, ctx.body || '-'); 
+    if (isStream(ctx.body)) ctx.log.info(ctx.session, "rsp", ctx.status, 'stream'); 
+    else {
+        ctx.set('Content-Type', 'application/json');
+        ctx.log.info(ctx.session, "rsp", ctx.status, ctx.body || '-');     
+    }
 }
 
 module.exports = (module, options)=>{

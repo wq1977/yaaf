@@ -4,13 +4,14 @@
   "description": "Yet Another Api Framework",
   "license": "MIT",
   "scripts": {
-    "test" : "NODE_CONFIG_DIR=./test jest",
+    "test": "NODE_CONFIG_DIR=./test jest",
     "patch": "yarn version --new-version patch"
   },
   "dependencies": {
     "config": "^3.0.1",
     "cron": "^1.6.0",
     "hashids": "^1.2.2",
+    "is-stream": "^1.1.0",
     "json5": "^2.1.0",
     "koa": "^2.6.2",
     "koa-body": "^4.0.6",
