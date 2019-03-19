@@ -30,8 +30,8 @@ class Task{
             ctx.log = this.log;
             ctx.config = config;
             ctx.info = this.log.info.bind(this.log,'no-session');        
-            ctx.error = this.log.error.bind(this.log,'no-session');                
-        if ('x-session' in ctx.req.headers) {
+            ctx.error = this.log.error.bind(this.log,'no-session');   
+            if ('x-session' in ctx.req.headers) {
                 ctx.session = ctx.req.headers['x-session'];
                 ctx.info = this.log.info.bind(this.log, ctx.session);        
                 ctx.error = this.log.error.bind(this.log, ctx.session);                

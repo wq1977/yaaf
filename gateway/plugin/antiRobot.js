@@ -29,23 +29,23 @@ module.exports = async(ctx, next)=>{
 
     // 如果未登录就请求api，将被认为是机器人发送的消息
     const login = await redis.hget(`session-${ctx.session}`, 'login');
-    let urlkey = ctx.req.url in config.tc ? ctx.req.url : 'default';
-    if (("role" in config.tc[urlkey]) && (login != 1)) {
-        ctx.body = response(errorCode.sessionTimeout);
-        log.error(ctx.session,'api-need-login',ctx.request.ip, ctx.req.url);
-        return;
-    }    
-
+    let urlkey = ctx.req.url // in config.tc ? ctx.req.url : 'default';
+    const defaulttc = config.tc['default']
+    const apitc = {...defaulttc, ...(config.tc[urlkey] || {})}
     const userrole = await redis.hget(`session-${ctx.session}`, 'role');
-    if (config.tc[urlkey].role && (!(config.tc[urlkey].role & userrole))){
-        ctx.status=403;
-        log.error(ctx.session,'api-need-role',ctx.request.ip, ctx.req.url, config.tc[urlkey].role, userrole);
-        return;
+    const apirole = apitc.role
+    if (apirole !== null) {
+        if ((apirole === 0 && userrole === null) ||
+            ((apirole > 0) && !(apirole & userrole))) {
+                ctx.status=403;
+                log.error(ctx.session,'api-need-role',ctx.request.ip, ctx.req.url, apirole, userrole, apitc);
+                return;        
+            }
     }
 
     //TODO 如果发送的 session 所代表的指纹 被认为是 恶意的指纹，将被认为是 机器人发送的消息
 
-    if ("role" in config.tc[urlkey]) {
+    if (apirole !== null) {
         //如果通过了检查，就重制session的超时时间
         await redis.expire(`session-${ctx.session}`, config.common.expire.session);
     }
