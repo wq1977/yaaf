@@ -339,6 +339,29 @@
   resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-12.0.9.tgz#693e76a52f61a2f1e7fb48c0eef167b95ea4ffd0"
   integrity sha512-sCZy4SxP9rN2w30Hlmg5dtdRwgYQfYRiLo9usw8X9cxlf+H4FqM1xX7+sNH7NNKVdbXMJWqva7iyy+fxh/V7fA==
 
+"File@>= 0.0.0":
+  version "0.10.2"
+  resolved "https://registry.yarnpkg.com/File/-/File-0.10.2.tgz#e899f776d273e2243ba86105bb3b056d0fb95604"
+  integrity sha1-6Jn3dtJz4iQ7qGEFuzsFbQ+5VgQ=
+  dependencies:
+    mime ">= 0.0.0"
+
+"FileReader@>= 0.0.0":
+  version "0.10.2"
+  resolved "https://registry.yarnpkg.com/FileReader/-/FileReader-0.10.2.tgz#1b117bdb6b5ed85e241ac3cb10f1b7086524e539"
+  integrity sha1-GxF722te2F4kGsPLEPG3CGUk5Tk=
+
+FormData@^0.10.1:
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/FormData/-/FormData-0.10.1.tgz#806853e89fdc03bbb1c620a5184ac5e47b341d00"
+  integrity sha1-gGhT6J/cA7uxxiClGErF5Hs0HQA=
+  dependencies:
+    File ">= 0.0.0"
+    FileReader ">= 0.0.0"
+    bufferjs ">= 0.0.0"
+    forEachAsync ">= 2.0.0"
+    remedial ">= 0.0.0"
+
 abab@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/abab/-/abab-2.0.0.tgz#aba0ab4c5eee2d4c79d3487d85450fb2376ebb0f"
@@ -634,6 +657,11 @@ buffer-from@^1.0.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/buffer-from/-/buffer-from-1.1.1.tgz#32713bc028f75c02fdb710d7c7bcec1f2c6070ef"
   integrity sha512-MQcXEUbCKtEo7bhqEs6560Hyd4XaovZlO/k9V3hjVUF/zwW7KBVdSK4gIt/bzwS9MbR5qob+F5jusZsb0YQK2A==
+
+"bufferjs@>= 0.0.0":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/bufferjs/-/bufferjs-3.0.1.tgz#0692e829cb10a10550e647390b035eb06c38e8ef"
+  integrity sha1-BpLoKcsQoQVQ5kc5CwNesGw46O8=
 
 bytes@3.0.0:
   version "3.0.0"
@@ -1240,6 +1268,11 @@ for-in@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/for-in/-/for-in-1.0.2.tgz#81068d295a8142ec0ac726c6e2200c30fb6d5e80"
   integrity sha1-gQaNKVqBQuwKxybG4iAMMPttXoA=
+
+"forEachAsync@>= 2.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/forEachAsync/-/forEachAsync-3.0.0.tgz#3475a95a77e4dc2d2800913e6824de77b00cd80a"
+  integrity sha1-NHWpWnfk3C0oAJE+aCTed7AM2Ao=
 
 forever-agent@~0.6.1:
   version "0.6.1"
@@ -2526,6 +2559,11 @@ mime-types@^2.1.18, mime-types@~2.1.18:
   dependencies:
     mime-db "~1.37.0"
 
+"mime@>= 0.0.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/mime/-/mime-2.4.0.tgz#e051fd881358585f3279df333fe694da0bcffdd6"
+  integrity sha512-ikBcWwyqXQSHKtciCcctu9YfPbFYZ4+gbHEmE0Q8jzcTYQg5dHCr3g2wwAZjPoJfQVXZq6KXAjpXOTf5/cjT7w==
+
 mimic-fn@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/mimic-fn/-/mimic-fn-2.0.0.tgz#0913ff0b121db44ef5848242c38bbb35d44cabde"
@@ -3036,6 +3074,11 @@ regex-not@^1.0.0, regex-not@^1.0.2:
   dependencies:
     extend-shallow "^3.0.2"
     safe-regex "^1.1.0"
+
+"remedial@>= 0.0.0":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/remedial/-/remedial-1.0.8.tgz#a5e4fd52a0e4956adbaf62da63a5a46a78c578a0"
+  integrity sha512-/62tYiOe6DzS5BqVsNpH/nkGlX45C/Sp6V+NtiN6JQNS1Viay7cWkazmRkrQrdFj2eshDe96SIQNIoMxqhzBOg==
 
 remove-trailing-separator@^1.0.1:
   version "1.1.0"
