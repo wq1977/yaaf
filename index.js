@@ -32,10 +32,12 @@ class Task{
             ctx.config = config;
             ctx.info = this.log.info.bind(this.log,'no-session');        
             ctx.error = this.log.error.bind(this.log,'no-session');   
+            ctx.warn = this.log.warn.bind(this.log,'no-session');   
             if ('x-session' in ctx.req.headers) {
                 ctx.session = ctx.req.headers['x-session'];
                 ctx.info = this.log.info.bind(this.log, ctx.session);        
                 ctx.error = this.log.error.bind(this.log, ctx.session);                
+                ctx.warn = this.log.warn.bind(this.log, ctx.session);                
             }
             ctx.errorCode =errorCode;
             ctx.func = func;
