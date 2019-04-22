@@ -22,6 +22,7 @@ class Task{
         this.use = this.api.use.bind(this.api);
         this.info = this.log.info.bind(this.log);        
         this.error = this.log.error.bind(this.log);        
+        this.warn = this.log.warn.bind(this.log);        
         this.config = config;
         if (options.parseBody) {
             this.api.use(require('koa-body')({ multipart: true }));

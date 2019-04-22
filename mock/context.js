@@ -8,6 +8,9 @@ const ctx={
     db:mysql,
     cache:redis,
     log,
+    info: log.info.bind(log),
+    error: log.error.bind(log),
+    warn: log.warn.bind(log),
     func,
     errorCode
 }
