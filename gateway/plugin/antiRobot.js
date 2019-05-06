@@ -47,6 +47,7 @@ module.exports = async(ctx, next)=>{
 
     if (apirole !== null) {
         //如果通过了检查，就重制session的超时时间
+        ctx.info('refresh-session-timeout', config.common.expire.session)
         await redis.expire(`session-${ctx.session}`, config.common.expire.session);
     }
 
