@@ -25,6 +25,10 @@ class Task{
         this.warn = this.log.warn.bind(this.log);        
         this.config = config;
         if (options.parseBody) {
+            this.api.use(async(ctx, next) => {
+                if (ctx.request.type.indexOf('xml') >= 0) ctx.is = (a)=>a==='text';
+                await next()
+            }) 
             this.api.use(require('koa-body')({ multipart: true }));
         }
         this.api.use(async (ctx, next) => {
