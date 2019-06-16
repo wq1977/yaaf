@@ -93,7 +93,7 @@ async function appendSessionData(ctx, next) {
 
 async function logRequest(ctx, next) {
     const isStream = require('is-stream');
-    ctx.log.info(ctx.session, "req", ctx.req.url, ctx.req.method, ctx.request.headers['x-real-ip']); 
+    ctx.log.info(ctx.session, "req", ctx.req.url, ctx.req.method, ctx.request.headers['x-real-ip'], ctx.request.body); 
     await next();
     if (isStream(ctx.body)) ctx.log.info(ctx.session, "rsp", ctx.status, 'stream'); 
     else {
