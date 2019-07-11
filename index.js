@@ -96,14 +96,15 @@ async function dupRequestCheck(ctx, next) {
     const defaulttc = ctx.config.tc['default']
     const urlkey = ctx.req.url
     const apitc = {...defaulttc, ...(ctx.config.tc[urlkey] || {})}
+    const cachekey = `api-last-req-${ctx.session}-${urlkey.replace(/\//g, '-')}`
     if (apitc.dupcheck) {
-        const lastreq = await ctx.cache.get(`api-last-req-${ctx.session}-${urlkey}`)
+        const lastreq = await ctx.cache.get(cachekey)
         if (lastreq === JSON.stringify(ctx.request.body)) {
             ctx.body = ctx.func.response(ctx.errorCode.invalidRequestParam, '不允许发送重复的请求')
             return
         }
         // 30秒内同一个API同一个用户不允许发送相同的请求
-        await ctx.cache.setex(`api-last-req-${ctx.session}-${urlkey}`, 30, JSON.stringify(ctx.request.body))
+        await ctx.cache.setex(cachekey, 30, JSON.stringify(ctx.request.body))
     }
     await next();
 }
