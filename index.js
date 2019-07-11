@@ -105,6 +105,7 @@ async function dupRequestCheck(ctx, next) {
         // 30秒内同一个API同一个用户不允许发送相同的请求
         await ctx.cache.setex(`api-last-req-${ctx.session}-${urlkey}`, 30, JSON.stringify(ctx.request.body))
     }
+    await next();
 }
 
 async function logRequest(ctx, next) {
