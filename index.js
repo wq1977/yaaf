@@ -54,6 +54,7 @@ class Task{
         this.func=func;
         this.errorCode = errorCode;
         this.api.use(logRequest);
+        this.api.use(dupRequestCheck);
         this.api.use(appendSessionData);
         this.start = this.api.start = (addr)=>{
             this.api.use(this.router.routes()).use(this.router.allowedMethods());
@@ -89,6 +90,21 @@ async function appendSessionData(ctx, next) {
         ctx.sessionData = data;
     }
     await next();
+}
+
+async function dupRequestCheck(ctx, next) {
+    const defaulttc = ctx.config.tc['default']
+    const urlkey = ctx.req.url
+    const apitc = {...defaulttc, ...(ctx.config.tc[urlkey] || {})}
+    if (apitc.dupcheck) {
+        const lastreq = await ctx.cache.get(`api-last-req-${ctx.session}-${urlkey}`)
+        if (lastreq === JSON.stringify(ctx.request.body)) {
+            ctx.body = ctx.func.response(ctx.errorCode.invalidRequestParam, '不允许发送重复的请求')
+            return
+        }
+        // 30秒内同一个API同一个用户不允许发送相同的请求
+        await ctx.cache.setex(`api-last-req-${ctx.session}-${urlkey}`, 30, JSON.stringify(ctx.request.body))
+    }
 }
 
 async function logRequest(ctx, next) {
