@@ -1,6 +1,6 @@
 
 const crontask = {};
-
+const md5 = require('md5')
 const config = require('./lib/config');
 const Koa = require('koa')
 
@@ -96,15 +96,16 @@ async function dupRequestCheck(ctx, next) {
     const defaulttc = ctx.config.tc['default']
     const urlkey = ctx.req.url
     const apitc = {...defaulttc, ...(ctx.config.tc[urlkey] || {})}
-    const cachekey = `lr-${ctx.session}-${urlkey.replace(/\//g, '-')}`
-    if (apitc.dupcheck) {
+    if (apitc.dupcheck && ctx.request.body) {
+        const cachekey = `lr-${ctx.session}-${urlkey.replace(/\//g, '-')}`
+        const cachevalue = md5(JSON.stringify(ctx.request.body))
         const lastreq = await ctx.cache.get(cachekey)
-        if (lastreq === JSON.stringify(ctx.request.body)) {
+        if (lastreq === cachevalue) {
             ctx.body = ctx.func.response(ctx.errorCode.invalidRequestParam, '不允许发送重复的请求')
             return
         }
-        // 30秒内同一个API同一个用户不允许发送相同的请求
-        await ctx.cache.setex(cachekey, 30, JSON.stringify(ctx.request.body))
+        // 10秒内同一个API同一个用户不允许发送相同的请求
+        await ctx.cache.setex(cachekey, 10, cachevalue)
     }
     await next();
 }
