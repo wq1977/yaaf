@@ -29,7 +29,12 @@ class Task{
                 if (ctx.request.type.indexOf('xml') >= 0) ctx.is = (a)=>a==='text';
                 await next()
             }) 
-            this.api.use(require('koa-body')({ multipart: true }));
+            this.api.use(require('koa-body')({
+                multipart: true,
+                formidable: {
+                    maxFieldsSize: 157286400
+                }
+            }));
         }
         this.api.use(async (ctx, next) => {
             ctx.log = this.log;
