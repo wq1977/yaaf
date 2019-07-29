@@ -52,12 +52,23 @@ function C(tablename, optsroot) {
 function R(tablename, optsroot) {
     return async (ctx) => {
         let {page, perPage, opts} = ctx.request.body
-        const {userid} = ctx.sessionData
         page = page || 1
         perPage = perPage || optsroot.perPage || 1000
         const options = {...optsroot, ...opts}
-        const query = ['userid = ?']
-        const values = [userid]
+
+        if (options.precheck) {
+            await options.precheck(ctx)
+            if (ctx.body) return
+        }
+
+        const query = []
+        const values = []
+        if (!ctx.request.body.userid) {
+            const {userid} = ctx.sessionData
+            query.push('userid = ?')
+            values.push(userid)    
+        }
+
         if (!options.includeDeleted) {
             query.push('deleteat is null')
         }
