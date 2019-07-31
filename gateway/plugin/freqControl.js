@@ -1,7 +1,7 @@
 const config = require('../../lib/config');
 const redis = require('../../lib/redis')(config.redis.url);
 module.exports = async (ctx, next)=>{
-    if (ctx.config.whitelist && ctx.config.whitelist.list && (ctx.remoteip in ctx.config.whitelist.list )) {
+    if (ctx.config.whitelist && (ctx.config.whitelist.indexOf(ctx.remoteip)>=0 )) {
         return await next();
     }
 

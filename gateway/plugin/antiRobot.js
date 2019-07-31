@@ -4,7 +4,7 @@ const {response} = require('../../lib/func');
 const errorCode = require('../../lib/errorCode');
 
 module.exports = async(ctx, next)=>{
-    if (ctx.config.whitelist && (ctx.remoteip in [ctx.config.whitelist])) {
+    if (ctx.config.whitelist && (ctx.config.whitelist.indexOf(ctx.remoteip)>=0 )) {
         //白名单IP地址允许最低限度的校验，不需session，仅限制1分钟内的请求总数
         return await next();
     }
