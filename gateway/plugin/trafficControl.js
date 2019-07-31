@@ -1,7 +1,7 @@
 const config = require('../../lib/config');
 const redis = require('../../lib/redis')(config.redis.url);
 module.exports = async (ctx, next)=>{
-    if (ctx.config.whitelist && (ctx.config.whitelist.indexOf(ctx.remoteip)>=0 )) {
+    if (ctx.config.whitelist && ctx.config.whitelist.list && (ctx.config.whitelist.list.indexOf(ctx.remoteip)>=0 )) {
         //白名单IP地址允许最低限度的校验，不需session，仅限制1分钟内的请求总数
         const key = `fc-whitelist-${ctx.remoteip}`;
         const value = await redis.incr(key);
