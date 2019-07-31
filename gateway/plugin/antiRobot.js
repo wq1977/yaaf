@@ -4,11 +4,16 @@ const {response} = require('../../lib/func');
 const errorCode = require('../../lib/errorCode');
 
 module.exports = async(ctx, next)=>{
+    if (ctx.config.whitelist && (ctx.remoteip in [ctx.config.whitelist])) {
+        //白名单IP地址允许最低限度的校验，不需session，仅限制1分钟内的请求总数
+        return await next();
+    }
+
     const log = ctx.log;
     // 如果没有带 session 消息头的消息将被认为是 机器人发送的消息 
     if (!ctx.session) {
         ctx.status = 401;
-        log.error(ctx.session,'robot-req-no-session',ctx.request.ip, ctx.req.url);
+        log.error(ctx.session,'robot-req-no-session',ctx.remoteip, ctx.req.url);
         return;
     }
     // 如果带的 session 不是有效的 session， 将被认为是 session 超时 或者是机器人发送的消息
@@ -23,7 +28,7 @@ module.exports = async(ctx, next)=>{
     const delta = 'reqDelta' in config.antirobot ? config.antirobot.reqDelta : 1000;
     if ((ctx.req.url === '/code') && (duration < delta)) {
         ctx.status = 403;
-        log.error(ctx.session,'robot-code-too-fast',ctx.request.ip, ctx.req.url, duration, delta);
+        log.error(ctx.session,'robot-code-too-fast',ctx.remoteip, ctx.req.url, duration, delta);
         return;
     }    
 
@@ -38,7 +43,7 @@ module.exports = async(ctx, next)=>{
         if ((apirole === 0 && userrole === null) ||
             ((apirole > 0) && !(apirole & userrole))) {
                 ctx.status=403;
-                log.error(ctx.session,'api-need-role',ctx.request.ip, ctx.req.url, apirole, userrole, apitc);
+                log.error(ctx.session,'api-need-role',ctx.remoteip, ctx.req.url, apirole, userrole, apitc);
                 return;        
             }
     }
