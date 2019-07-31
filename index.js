@@ -36,25 +36,7 @@ class Task{
                 }
             }));
         }
-        this.api.use(async (ctx, next) => {
-            ctx.log = this.log;
-            ctx.config = config;
-            ctx.info = this.log.info.bind(this.log,'no-session');        
-            ctx.error = this.log.error.bind(this.log,'no-session');   
-            ctx.warn = this.log.warn.bind(this.log,'no-session');
-            ctx.remoteip = ctx.request.ip
-            if ('x-session' in ctx.req.headers) {
-                ctx.session = ctx.req.headers['x-session'];
-                ctx.info = this.log.info.bind(this.log, ctx.session);        
-                ctx.error = this.log.error.bind(this.log, ctx.session);                
-                ctx.warn = this.log.warn.bind(this.log, ctx.session);                
-            }
-            ctx.errorCode =errorCode;
-            ctx.func = func;
-            ctx.db = mysql;
-            ctx.cache=redis;
-            await next();
-        });
+        this.api.use(require('./lib/ctxpolyfill'))
         this.db = mysql;
         this.cache = redis;
         this.func=func;
@@ -128,5 +110,5 @@ async function logRequest(ctx, next) {
 }
 
 module.exports = (module, options)=>{
-    return new Task(module, options);
+    return new Task(module, options)
 }
