@@ -63,7 +63,7 @@ function R(tablename, optsroot) {
 
         const query = []
         const values = []
-        if (!('userid' in ctx.request.body.userid)) {
+        if (!('userid' in ctx.request.body)) {
             const {userid} = ctx.sessionData
             query.push('userid = ?')
             values.push(userid)    
