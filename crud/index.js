@@ -63,7 +63,7 @@ function R(tablename, optsroot) {
 
         const query = []
         const values = []
-        if (!ctx.request.body.userid) {
+        if (!('userid' in ctx.request.body.userid)) {
             const {userid} = ctx.sessionData
             query.push('userid = ?')
             values.push(userid)    
@@ -74,9 +74,14 @@ function R(tablename, optsroot) {
         }
         Object.keys(ctx.request.body).forEach(p=>{
             if (['page', 'perPage', 'opts'].indexOf(p) >= 0) return
-            const value = p.endsWith('id') ? ctx.func.desafeid(ctx.request.body[p]) : ctx.request.body[p]
-            query.push(`${p} = ?`)
-            values.push(value)
+            let value = ctx.request.body[p]
+            if (value === "not null") {
+                query.push(`${p} is not null`)
+            } else {
+                value = p.endsWith('id') && ctx.request.body[p] ? ctx.func.desafeid(ctx.request.body[p]) : ctx.request.body[p]
+                query.push(`${p} = ?`)
+                values.push(value)
+            }
         })
         const rows = await ctx.db.query(`select SQL_CALC_FOUND_ROWS * from ${tablename} where 1=1 and ${query.join(' and ')} ${options.sort ? ('order by QUOTE(' + options.sort + ')') : ''} ${options.desc ? 'desc' : ''} limit ?,?`,
                 [...values, (page -1) * perPage, perPage], ctx.info)
