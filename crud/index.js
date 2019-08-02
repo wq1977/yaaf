@@ -2,6 +2,19 @@
  * 每一张表必有的字段为id,createat,deleteat,updateat,userid
  */
 
+const commonItemMap = (ctx, item) => {
+    const result = {}
+    for (let key in item) {
+        if (key.endsWith('id')) {
+            if (item[key] && ctx.func.safeid(item[key])) {
+                result[key] = ctx.func.safeid(item[key])
+            }
+        }
+    }
+    return result
+}
+
+
 /**
  * 通用创建记录模板，规范创建记录操作
  */
@@ -34,10 +47,10 @@ function C(tablename, optsroot) {
         const res = await ctx.db.query(`insert into ${tablename} (${keys.join(",")}) values (${keys.map(k=>'?').join(",")})`, values, ctx.info)
         const id = res.insertId
         const row = await ctx.db.query(`select * from ${tablename} where id = ?`, [id])
-        const extramap = options.itemmap ? await options.itemmap(ctx, row[0]) : {}
+        const result = {...row[0], ...commonItemMap(row[0])}
+        const extramap = options.itemmap ? await options.itemmap(ctx, result) : {}
         ctx.body = ctx.func.response(0, {
-            ...row[0],
-            id: ctx.func.safeid(row[0].id),
+            ...result,
             ...extramap 
         })    
     }
@@ -87,11 +100,12 @@ function R(tablename, optsroot) {
                 [...values, (page -1) * perPage, perPage], ctx.info)
         const total = await ctx.db.query('select FOUND_ROWS() as total')
         const items = []
+        ctx.rows = rows
         for (let row of rows) {
-            const extramap = options.itemmap ? await options.itemmap(ctx, row) : {}
+            const result = {...row, ...commonItemMap(row)}
+            const extramap = options.itemmap ? await options.itemmap(ctx, result) : {}
             items.push({
-                ...row,
-                id: ctx.func.safeid(row.id),
+                ...result,
                 ...extramap
             })
         }
@@ -133,10 +147,10 @@ function U(tablename, optsroot) {
 
         await ctx.db.query(`update ${tablename} set ${keys.map(r => r + '=?').join(',')} where ${wherekeys.map(r=>r+'=?').join('and')}`, [...values, ...wherevalues], ctx.info)
         const row = await ctx.db.query(`select * from ${tablename} where ${wherekeys.map(r=>r+'=?').join('and')}`, [...wherevalues])
-        const extramap = options.itemmap ? await options.itemmap(ctx, row[0]) : {}
+        const result = {...row[0], ...commonItemMap(row[0])}
+        const extramap = options.itemmap ? await options.itemmap(ctx, result) : {}
         ctx.body = ctx.func.response(0, {
-            ...row[0],
-            id: ctx.func.safeid(row[0].id),
+            ...result,
             ...extramap 
         })    
     }
