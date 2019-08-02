@@ -169,9 +169,9 @@ function D() {
  */
 function routes(task, cfg) {
     for (let table of task.config.crud.tables) {
-        task.post(`/curd/${table}/create`, C(table, cfg))
-        task.post(`/curd/${table}/list`, R(table, cfg))
-        task.post(`/curd/${table}/update`, U(table, cfg))
+        task.post(`/crud/${table}/create`, C(table, cfg))
+        task.post(`/crud/${table}/list`, R(table, cfg))
+        task.post(`/crud/${table}/update`, U(table, cfg))
     }
 }
 
