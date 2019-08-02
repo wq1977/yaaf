@@ -162,6 +162,19 @@ function U(tablename, optsroot) {
 function D() {
 }
 
+/**
+ * 通用路由函数
+ * @param {*} task 
+ * @param {*} cfg 
+ */
+function routes(task, cfg) {
+    for (let table of task.config.crud.tables) {
+        task.post(`/curd/${table}/create`, C(table, cfg))
+        task.post(`/curd/${table}/list`, R(table, cfg))
+        task.post(`/curd/${table}/update`, U(table, cfg))
+    }
+}
+
 module.exports = {
-    C,R,U,D
+    C,R,U,D,routes
 }
