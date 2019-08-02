@@ -47,7 +47,7 @@ function C(tablename, optsroot) {
         const res = await ctx.db.query(`insert into ${tablename} (${keys.join(",")}) values (${keys.map(k=>'?').join(",")})`, values, ctx.info)
         const id = res.insertId
         const row = await ctx.db.query(`select * from ${tablename} where id = ?`, [id])
-        const result = {...row[0], ...commonItemMap(row[0])}
+        const result = {...row[0], ...commonItemMap(ctx, row[0])}
         const extramap = options.itemmap ? await options.itemmap(ctx, result) : {}
         ctx.body = ctx.func.response(0, {
             ...result,
@@ -110,7 +110,7 @@ function R(tablename, optsroot) {
         const items = []
         ctx.rows = rows
         for (let row of rows) {
-            const result = {...row, ...commonItemMap(row)}
+            const result = {...row, ...commonItemMap(ctx, row)}
             const extramap = options.itemmap ? await options.itemmap(ctx, result) : {}
             items.push({
                 ...result,
@@ -155,7 +155,7 @@ function U(tablename, optsroot) {
 
         await ctx.db.query(`update ${tablename} set ${keys.map(r => r + '=?').join(',')} where ${wherekeys.map(r=>r+'=?').join('and')}`, [...values, ...wherevalues], ctx.info)
         const row = await ctx.db.query(`select * from ${tablename} where ${wherekeys.map(r=>r+'=?').join('and')}`, [...wherevalues])
-        const result = {...row[0], ...commonItemMap(row[0])}
+        const result = {...row[0], ...commonItemMap(ctx, row[0])}
         const extramap = options.itemmap ? await options.itemmap(ctx, result) : {}
         ctx.body = ctx.func.response(0, {
             ...result,
