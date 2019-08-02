@@ -36,6 +36,10 @@ class Task{
                 }
             }));
         }
+        this.api.use(async(ctx, next) => {
+            ctx._module = module
+            await next() 
+        })
         this.api.use(require('./lib/ctxpolyfill'))
         this.db = mysql;
         this.cache = redis;
