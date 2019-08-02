@@ -48,7 +48,7 @@ function C(tablename, optsroot) {
         const id = res.insertId
         const row = await ctx.db.query(`select * from ${tablename} where id = ?`, [id])
         const result = {...row[0], ...commonItemMap(ctx, row[0])}
-        const extramap = options.itemmap ? await options.itemmap(ctx, result) : {}
+        const extramap = options.itemmap ? await options.itemmap(ctx, row[0]) : {}
         ctx.body = ctx.func.response(0, {
             ...result,
             ...extramap 
@@ -74,7 +74,8 @@ function R(tablename, optsroot) {
             if (ctx.body) return
         }
 
-        const symbol = ctx.request.body.symbol || {}
+        const symbol = ctx.request.body._symbol || {}
+        const symbolname = ctx.request.body._name || {}
         Object.keys(symbol).forEach(key => {
             if (['=', 'in', '&'].indexOf(symbol[key]) < 0) {
                 ctx.body = ctx.func.response(ctx.errorCode.invalidRequestParam, `不允许的操作:${symbol[key]}`)
@@ -84,9 +85,11 @@ function R(tablename, optsroot) {
         const query = []
         const values = []
         if (!('userid' in ctx.request.body)) {
-            const {userid} = ctx.sessionData
-            query.push(`userid ${symbol.userid || '='} ?`)
-            values.push(userid)    
+            if (ctx.sessionData && ctx.sessionData.userid) {
+                const {userid} = ctx.sessionData
+                query.push(`userid ${symbol.userid || '='} ?`)
+                values.push(userid)        
+            }
         }
 
         if (!options.includeDeleted) {
@@ -94,13 +97,22 @@ function R(tablename, optsroot) {
         }
 
         Object.keys(ctx.request.body).forEach(p=>{
-            if (['page', 'perPage', 'opts', 'symbol'].indexOf(p) >= 0) return
+            if (['page', 'perPage', 'opts'].indexOf(p) >= 0) return
+            if (p.startsWith('_')) return
             let value = ctx.request.body[p]
             if (value === "not null") {
-                query.push(`${p} is not null`)
+                query.push(`${symbolname[p] || p} is not null`)
             } else {
-                value = p.endsWith('id') && ctx.request.body[p] ? ctx.func.desafeid(ctx.request.body[p]) : ctx.request.body[p]
-                query.push(`${p} ${symbol[p] || '='} ?`)
+                let value = ctx.request.body[p]
+                if (p.endsWith('id')) {
+                    if (Array.isArray(value)) {
+                        value = value.map(r => ctx.func.desafeid(r) || r)
+                    } else {
+                        value = ctx.func.desafeid(value) || value
+                    }
+                }
+                const symbolp = symbol[p] || '='
+                query.push(`${symbolname[p] || p} ${symbolp} ${ symbolp === 'in' ? '(?)' : '?'}`)
                 values.push(value)
             }
         })
@@ -111,7 +123,7 @@ function R(tablename, optsroot) {
         ctx.rows = rows
         for (let row of rows) {
             const result = {...row, ...commonItemMap(ctx, row)}
-            const extramap = options.itemmap ? await options.itemmap(ctx, result) : {}
+            const extramap = options.itemmap ? await options.itemmap(ctx, row) : {}
             items.push({
                 ...result,
                 ...extramap
@@ -153,14 +165,19 @@ function U(tablename, optsroot) {
             }
         }
 
-        await ctx.db.query(`update ${tablename} set ${keys.map(r => r + '=?').join(',')} where ${wherekeys.map(r=>r+'=?').join('and')}`, [...values, ...wherevalues], ctx.info)
-        const row = await ctx.db.query(`select * from ${tablename} where ${wherekeys.map(r=>r+'=?').join('and')}`, [...wherevalues])
-        const result = {...row[0], ...commonItemMap(ctx, row[0])}
-        const extramap = options.itemmap ? await options.itemmap(ctx, result) : {}
-        ctx.body = ctx.func.response(0, {
-            ...result,
-            ...extramap 
-        })    
+        const idrow = await ctx.db.query(`select id from ${tablename} where ${wherekeys.map(r=>r+'=?').join(' and ')}`, [...wherevalues])
+        if (idrow.length > 0) {
+            await ctx.db.query(`update ${tablename} set ${keys.map(r => r + '=?').join(',')} where ${wherekeys.map(r=>r+'=?').join(' and ')}`, [...values, ...wherevalues], ctx.info)
+            const row = await ctx.db.query(`select * from ${tablename} where id = ?`, [idrow[0].id])
+            const result = {...row[0], ...commonItemMap(ctx, row[0])}
+            const extramap = options.itemmap ? await options.itemmap(ctx, row[0]) : {}    
+            ctx.body = ctx.func.response(0, {
+                ...result,
+                ...extramap 
+            })    
+        } else {
+            ctx.body = ctx.func.response(ctx.errorCode.invalidRequestParam, '找不到符合的记录')
+        }
     }
 }
 
@@ -177,9 +194,9 @@ function D() {
  */
 function routes(task, cfg) {
     for (let table of task.config.crud.tables) {
-        task.post(`/crud/${table}/create`, C(table, cfg))
-        task.post(`/crud/${table}/list`, R(table, cfg))
-        task.post(`/crud/${table}/update`, U(table, cfg))
+        task.post(`/crud/${table}/create`, C(table, cfg(table)))
+        task.post(`/crud/${table}/list`, R(table, cfg(table)))
+        task.post(`/crud/${table}/update`, U(table, cfg(table)))
     }
 }
 
