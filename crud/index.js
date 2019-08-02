@@ -24,7 +24,7 @@ function C(tablename, optsroot) {
         const opts = ctx.request.body.opts
         const options = {...optsroot, ...opts}
         const values = keys.map(key => key.endsWith('id') ? ctx.func.desafeid(ctx.request.body[key]) : ctx.request.body[key])
-        const {userid} = ctx.sessionData
+        const userid = (ctx.sessionData && ctx.sessionData.userid) || null
         if (userid) {
             keys.push('userid')
             values.push(userid)    
@@ -100,7 +100,7 @@ function R(tablename, optsroot) {
                 query.push(`${p} is not null`)
             } else {
                 value = p.endsWith('id') && ctx.request.body[p] ? ctx.func.desafeid(ctx.request.body[p]) : ctx.request.body[p]
-                query.push(`${p} ${symbol.userid || '='} ?`)
+                query.push(`${p} ${symbol[p] || '='} ?`)
                 values.push(value)
             }
         })
