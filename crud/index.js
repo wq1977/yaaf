@@ -74,25 +74,33 @@ function R(tablename, optsroot) {
             if (ctx.body) return
         }
 
+        const symbol = ctx.request.body.symbol || {}
+        Object.keys(symbol).forEach(key => {
+            if (['=', 'in', '&'].indexOf(symbol[key]) < 0) {
+                ctx.body = ctx.func.response(ctx.errorCode.invalidRequestParam, `不允许的操作:${symbol[key]}`)
+                return
+            }
+        })
         const query = []
         const values = []
         if (!('userid' in ctx.request.body)) {
             const {userid} = ctx.sessionData
-            query.push('userid = ?')
+            query.push(`userid ${symbol.userid || '='} ?`)
             values.push(userid)    
         }
 
         if (!options.includeDeleted) {
             query.push('deleteat is null')
         }
+
         Object.keys(ctx.request.body).forEach(p=>{
-            if (['page', 'perPage', 'opts'].indexOf(p) >= 0) return
+            if (['page', 'perPage', 'opts', 'symbol'].indexOf(p) >= 0) return
             let value = ctx.request.body[p]
             if (value === "not null") {
                 query.push(`${p} is not null`)
             } else {
                 value = p.endsWith('id') && ctx.request.body[p] ? ctx.func.desafeid(ctx.request.body[p]) : ctx.request.body[p]
-                query.push(`${p} = ?`)
+                query.push(`${p} ${symbol.userid || '='} ?`)
                 values.push(value)
             }
         })
