@@ -6,7 +6,6 @@ const Koa = require('koa')
 
 const errorCode = require('./lib/errorCode');
 const func = require('./lib/func');
-const mysql = require('./lib/mysql')(config.mysql.url);
 const redis = require('./lib/redis')(config.redis.url);
 
 
@@ -41,7 +40,6 @@ class Task{
             await next() 
         })
         this.api.use(require('./lib/ctxpolyfill'))
-        this.db = mysql;
         this.cache = redis;
         this.func=func;
         this.errorCode = errorCode;
