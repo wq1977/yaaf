@@ -1,12 +1,13 @@
 const config = require('../lib/config');
-const mysql = require('../lib/mysql')(config.mysql.url);
+const libmysql = require('../lib/mysql')
 const redis = require('../lib/redis')(config.redis.url);
 const log = require('../lib/log').get('unittest');
 const func = require('../lib/func');
 const errorCode = require('../lib/errorCode');
 const ctx={
-    db:mysql,
+    db: {destroy(){}},
     cache:redis,
+    config,
     log,
     info: log.info.bind(log),
     error: log.error.bind(log),
@@ -14,8 +15,13 @@ const ctx={
     func,
     errorCode
 }
+let mysql
 let mockdbname = 'db_'+Math.round(Math.random()*10000);
-ctx.db.init=async function(dbname){   
+ctx.db.init=async function(dbname){
+    const init = ctx.db.init  
+    await libmysql(ctx, async a=>a)
+    mysql = ctx.db
+    ctx.db.init = init
     if (dbname)  mockdbname = dbname;
     const rows = await mysql.query(`SELECT table_name FROM INFORMATION_SCHEMA.TABLES WHERE table_schema = '${mysql._client.config.database}'`);
     const tables=[];
@@ -34,6 +40,7 @@ ctx.db.init=async function(dbname){
         await mysql.query(table.create);
         await mysql.query(table.truncate);
     }
+    console.log('using mock db:', mockdbname)
 }
 
 ctx.destroy=async function(drop){
