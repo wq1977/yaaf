@@ -101,13 +101,35 @@ async function dupRequestCheck(ctx, next) {
 }
 
 async function logRequest(ctx, next) {
-    const isStream = require('is-stream');
-    ctx.log.info(ctx.session, "req", ctx.req.url, ctx.req.method, ctx.request.headers['x-real-ip'], ctx.request.body); 
+    const isStream = require('is-stream')
+    ctx.log.info({
+        session: ctx.session, 
+        type: "req",
+        path: ctx.req.url,
+        method: ctx.req.method,
+        requestip: ctx.request.headers['x-real-ip'] || '-',
+        requestbody: ctx.request.body || '-'
+    })
     await next();
-    if (isStream(ctx.body)) ctx.log.info(ctx.session, "rsp", ctx.status, 'stream'); 
-    else {
-        ctx.set('Content-Type', 'application/json');
-        ctx.log.info(ctx.session, "rsp", ctx.status, ctx.body || '-');     
+    if (isStream(ctx.body)) ctx.log.info({
+        session: ctx.session,
+        type: "rsp",
+        status: ctx.status,
+        rsp: 'stream'
+    }); else {
+        ctx.set('Content-Type', 'application/json')
+        let rsp
+        try {
+            rsp = JSON.parse(ctx.body)
+        } catch (ex) {
+            rsp = {rsp: ctx.body}
+        }
+        ctx.log.info({
+            session: ctx.session,
+            type: "rsp",
+            status: ctx.status,
+            ...rsp
+        })
     }
 }
 
