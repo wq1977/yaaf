@@ -13,14 +13,20 @@ module.exports = async(ctx, next)=>{
     // 如果没有带 session 消息头的消息将被认为是 机器人发送的消息 
     if (!ctx.session) {
         ctx.status = 401;
-        log.error(ctx.session,'robot-req-no-session',ctx.remoteip, ctx.req.url);
+        log.error({
+            session: ctx.session,
+            tag: 'robot-req-no-session',
+            args: [ctx.remoteip, ctx.req.url]});
         return;
     }
     // 如果带的 session 不是有效的 session， 将被认为是 session 超时 或者是机器人发送的消息
     const createat = await redis.hget(`session-${ctx.session}`, 'createat');
     if (!createat) {
         ctx.body = response(errorCode.sessionTimeout);
-        log.error(ctx.session,'robot-req-session-timeout', ctx.req.url, ctx.session);
+        log.error({
+            session: ctx.session,
+            tag: 'robot-req-session-timeout',
+            args: [ctx.req.url, ctx.session]});
         return;        
     }
     // 如果发送的 session 太快，将被认为是机器人发送的消息
@@ -28,7 +34,10 @@ module.exports = async(ctx, next)=>{
     const delta = 'reqDelta' in config.antirobot ? config.antirobot.reqDelta : 1000;
     if ((ctx.req.url === '/code') && (duration < delta)) {
         ctx.status = 403;
-        log.error(ctx.session,'robot-code-too-fast',ctx.remoteip, ctx.req.url, duration, delta);
+        log.error({
+            session: ctx.session,
+            tag: 'robot-code-too-fast',
+            args: [ctx.remoteip, ctx.req.url, duration, delta]});
         return;
     }    
 
@@ -43,7 +52,10 @@ module.exports = async(ctx, next)=>{
         if ((apirole === 0 && userrole === null) ||
             ((apirole > 0) && !(apirole & userrole))) {
                 ctx.status=403;
-                log.error(ctx.session,'api-need-role',ctx.remoteip, ctx.req.url, apirole, userrole, apitc);
+                log.error({
+                    session: ctx.session,
+                    tag: 'api-need-role',
+                    args: [ctx.remoteip, ctx.req.url, apirole, userrole, apitc]});
                 return;        
             }
     }

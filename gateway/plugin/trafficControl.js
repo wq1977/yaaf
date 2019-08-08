@@ -9,7 +9,10 @@ module.exports = async (ctx, next)=>{
             redis.expire(key, 60);
         } else if (value > ctx.config.whitelist.limit) {
             ctx.status = 429;
-            log.error(ctx.session,'fc-429', ctx.remoteip);
+            log.error({
+                session: ctx.session,
+                tag: 'fc-429',
+                args: [ctx.remoteip]});
             return;
         }
         return await next()
@@ -27,7 +30,10 @@ module.exports = async (ctx, next)=>{
     } else if (value > config.tc[urlkey].total) {
         //TODO only allow big person use
         ctx.status = 429;
-        log.error(ctx.session,'tc-429', ip, urlkey);
+        log.error({
+            session: ctx.session,
+            tag: 'tc-429',
+            args: [ip, urlkey]});
         return;
     }
     await next();

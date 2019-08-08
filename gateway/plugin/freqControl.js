@@ -18,7 +18,10 @@ module.exports = async (ctx, next)=>{
         redis.expire(key, 60);
     } else if (value > config.tc[urlkey].perip) {
         ctx.status = 429;
-        log.error(ctx.session,'fc-429',ip, urlkey);
+        log.error({
+            session: ctx.session,
+            tag: 'fc-429',
+            args: [ip, urlkey]});
         return;
     }
     await next();

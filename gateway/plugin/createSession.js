@@ -7,7 +7,10 @@ module.exports = async(ctx, next)=>{
         const log = ctx.log;
 
         if (ctx.session) {
-            log.info(ctx.session, 'invalidate-old-session', ctx.session);
+            log.info({
+                session: ctx.session,
+                tag: 'invalidate-old-session',
+                args: [ctx.session]});
             await redis.del(`session-${ctx.session}`);
         }
 
@@ -20,7 +23,11 @@ module.exports = async(ctx, next)=>{
         try {
             ctx.request.body = JSON.parse(rawbody);
         } catch (ex) {
-            log.error('','json-body-error', rawbody, ex);
+            log.error({
+                session: ctx.session,
+                tag: 'json-body-error',
+                args: [rawbody, ex]
+            });
             ctx.status = 403;
             return;
         }
@@ -30,7 +37,10 @@ module.exports = async(ctx, next)=>{
         if (sessions.length >= config.common.quota.session){
             ctx.status = 403;
             ctx.message = 'Too many sessions';
-            log.error('','create-session','too many sessions');
+            log.error({
+                session: ctx.session, 
+                tag: 'create-session',
+                args: ['too many sessions']});
             return;
         }
         // 在 redis 中创建一个 session 并且初始化
@@ -41,7 +51,6 @@ module.exports = async(ctx, next)=>{
         ctx.session = session;
         // 返回创建的 session
         ctx.body = response(0, session)
-        log.info(session,'create-session','succ');
         return;
     } else {
         await next();
