@@ -127,6 +127,7 @@ async function logRequest(ctx, next) {
         ctx.log.info({
             session: ctx.session,
             type: "rsp",
+            path: ctx.req.url,
             status: ctx.status,
             ...rsp
         })
