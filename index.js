@@ -105,15 +105,17 @@ async function logRequest(ctx, next) {
     ctx.log.info({
         session: ctx.session, 
         type: "req",
-        path: ctx.req.url,
         method: ctx.req.method,
-        requestip: ctx.request.headers['x-real-ip'] || '-',
+        path: ctx.req.url,
+        remoteip: ctx.remoteip,
         requestbody: ctx.request.body || '-'
     })
     await next();
     if (isStream(ctx.body)) ctx.log.info({
         session: ctx.session,
         type: "rsp",
+        path: ctx.req.url,
+        remoteip: ctx.remoteip,
         status: ctx.status,
         rsp: 'stream'
     }); else {
@@ -128,6 +130,7 @@ async function logRequest(ctx, next) {
             session: ctx.session,
             type: "rsp",
             path: ctx.req.url,
+            remoteip: ctx.remoteip,
             status: ctx.status,
             ...rsp
         })
