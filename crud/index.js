@@ -77,7 +77,7 @@ function R(tablename, optsroot) {
         const symbol = ctx.request.body._symbol || {}
         const symbolname = ctx.request.body._name || {}
         Object.keys(symbol).forEach(key => {
-            if (['=', 'in', '&'].indexOf(symbol[key]) < 0) {
+            if (['=', 'in', '&', '>', '>=', '<', '<='].indexOf(symbol[key]) < 0) {
                 ctx.body = ctx.func.response(ctx.errorCode.invalidRequestParam, `不允许的操作:${symbol[key]}`)
                 return
             }
