@@ -43,6 +43,10 @@ class Task{
         this.cache = redis;
         this.func=func;
         this.errorCode = errorCode;
+        try {
+            const userplugin = require('../../../runtime/plugin/yaaf')
+            userplugin && this.api.use(userplugin);
+        } catch {}
         this.api.use(logRequest);
         this.api.use(dupRequestCheck);
         this.api.use(appendSessionData);
