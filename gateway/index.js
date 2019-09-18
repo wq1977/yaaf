@@ -1,3 +1,4 @@
+require('events').EventEmitter.defaultMaxListeners = 0
 const task = require('..')('gateway', {
     parseBody: false
 });
