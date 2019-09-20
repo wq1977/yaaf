@@ -59,10 +59,10 @@ class Task{
 
         const Router = require('koa-router');
         this.router = new Router();
-        this.get=this.api.get = this.router.get.bind(this.router);
-        this.post=this.api.post = this.router.post.bind(this.router);
+        this.get=this.api.get = this.router.get.bind(this.router)
+        this.post=this.api.post = this.router.post.bind(this.router)
 
-        this.crons=[];
+        this.crons=[]
         this.cron = {
             use: (func, rule)=>{
                 const CronJob = require('cron').CronJob;
@@ -75,7 +75,6 @@ class Task{
                 })
             }
         }
-        require('./lib/ctxpolyfill')(this.cron)
     }
 }
 
