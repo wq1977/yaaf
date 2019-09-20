@@ -75,6 +75,7 @@ class Task{
                 })
             }
         }
+        require('./lib/ctxpolyfill')(this.cron)
     }
 }
 
