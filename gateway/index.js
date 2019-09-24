@@ -9,7 +9,7 @@ const httpProxy = require('http-proxy-middleware')
 const serviceMap = {}
 const proxymap = {}
 async function normalroute(ctx, next) {
-    const host = ctx.sessionData.gradation && ctx.config.gradation ? ctx.config.gradation.host : '127.0.0.1'
+    const host = ctx.gradation && ctx.config.gradation ? ctx.config.gradation.host : '127.0.0.1'
     const key = `${host}${ctx.request.path}`
     if (!(key in serviceMap)) {
         if (!(key in proxymap)) {
@@ -42,7 +42,7 @@ async function normalroute(ctx, next) {
 const eldstart = task.start;
 task.start = ((addr)=>{
     task.api.use(async (ctx, next) => {
-        const host = ctx.sessionData.gradation && ctx.config.gradation ? ctx.config.gradation.host : '127.0.0.1'
+        const host = ctx.gradation && ctx.config.gradation ? ctx.config.gradation.host : '127.0.0.1'
         const key = `${host}${ctx.request.path}`
         if (!(key in serviceMap)) {
             serviceMap[key] = httpProxy(ctx.request.path, {
