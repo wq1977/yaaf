@@ -43,13 +43,13 @@ class Task{
         this.cache = redis;
         this.func=func;
         this.errorCode = errorCode;
+        this.api.use(logRequest);
+        this.api.use(dupRequestCheck);
+        this.api.use(appendSessionData);
         try {
             const userplugin = require('../../../runtime/plugin/yaaf')
             userplugin && this.api.use(userplugin);
         } catch {}
-        this.api.use(logRequest);
-        this.api.use(dupRequestCheck);
-        this.api.use(appendSessionData);
         this.start = this.api.start = (addr)=>{
             this.api.use(this.router.routes()).use(this.router.allowedMethods());
             const bindaddr = addr || '127.0.0.1'
