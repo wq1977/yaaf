@@ -40,13 +40,17 @@ async function normalroute(ctx, next) {
 }
 
 const eldstart = task.start;
+const cfgServiceMap = (ctx.config.gateway.services || []).reduce((r, service) => {
+    r[service[0]] = service
+    return r
+}, {})
 task.start = ((addr)=>{
     task.api.use(async (ctx, next) => {
         const host = ctx.gradation && ctx.config.gradation ? ctx.config.gradation.host : '127.0.0.1'
         const key = `${host}${ctx.request.path}`
-        if (!(key in serviceMap)) {
+        if (!(key in serviceMap) && (ctx.request.path in cfgServiceMap)) {
             serviceMap[key] = httpProxy(ctx.request.path, {
-                target: ctx.config.gradation ? service[1].replace(/[\d.]+/, host) : service[1], 
+                target: ctx.config.gradation ? cfgServiceMap[ctx.request.path][1].replace(/[\d.]+/, host) : cfgServiceMap[ctx.request.path][1], 
                 changeOrigin: true,
                 onError: (err, req, res)=>{
                     res.writeHead(501, {
