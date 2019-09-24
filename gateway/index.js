@@ -1,3 +1,4 @@
+const config = require('../lib/config')
 require('events').EventEmitter.defaultMaxListeners = 0
 const task = require('..')('gateway', {
     parseBody: false
@@ -40,7 +41,7 @@ async function normalroute(ctx, next) {
 }
 
 const eldstart = task.start;
-const cfgServiceMap = (ctx.config.gateway.services || []).reduce((r, service) => {
+const cfgServiceMap = (config.gateway.services || []).reduce((r, service) => {
     r[service[0]] = service
     return r
 }, {})
