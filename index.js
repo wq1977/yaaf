@@ -52,7 +52,7 @@ class Task{
         } catch {}
         this.start = this.api.start = (addr)=>{
             this.api.use(this.router.routes()).use(this.router.allowedMethods());
-            const bindaddr = addr || '127.0.0.1'
+            const bindaddr = addr || '0.0.0.0'
             this.api.listen(this.api_port, bindaddr);
             this.info(`service ${module} listenning at http://${bindaddr}:${this.api_port}`)
         }
