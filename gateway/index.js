@@ -49,7 +49,7 @@ task.start = ((addr)=>{
     task.api.use(async (ctx, next) => {
         const host = ctx.gradation && ctx.config.gradation ? ctx.config.gradation.host : '127.0.0.1'
         const key = `${host}${ctx.request.path}`
-        if (!(key in serviceMap) && (ctx.request.path in cfgServiceMap)) {
+        if ((!(key in serviceMap)) && (ctx.request.path in cfgServiceMap)) {
             serviceMap[key] = httpProxy(ctx.request.path, {
                 target: ctx.config.gradation ? cfgServiceMap[ctx.request.path][1].replace(/[\d.]+/, host) : cfgServiceMap[ctx.request.path][1], 
                 changeOrigin: true,
@@ -64,7 +64,7 @@ task.start = ((addr)=>{
             })    
         }
         if (key in serviceMap) {
-            await koaConnect(serviceMap[ctx.request.path])(ctx, next)
+            await koaConnect(serviceMap[key])(ctx, next)
         } else await next()
     })
     task.api.use(normalroute)
