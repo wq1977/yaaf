@@ -87,7 +87,7 @@ function R(tablename, optsroot) {
         if (!('userid' in ctx.request.body)) {
             if (ctx.sessionData && ctx.sessionData.userid) {
                 const {userid} = ctx.sessionData
-                query.push(`userid ${symbol.userid || '='} ?`)
+                query.push(`(userid ${symbol.userid || '='} ? || userid is null)`)
                 values.push(userid)        
             }
         }
