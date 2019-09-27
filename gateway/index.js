@@ -9,9 +9,12 @@ const httpProxy = require('http-proxy-middleware')
 
 const serviceMap = {}
 const proxymap = {}
+let reqsequence = 0
 async function normalroute(ctx, next) {
     const host = ctx.gradation && ctx.config.gradation ? ctx.config.gradation.host : '127.0.0.1'
     const key = `${host}${ctx.request.path}`
+    ctx.__yaaf = {url: ctx.request.path, host, reqsequence: reqsequence++, timestamp: new Date().getTime()}
+    ctx.info('yaaf-gateway-req', ctx.__yaaf)
     if (!(key in serviceMap)) {
         if (!(key in proxymap)) {
             const servicename = ctx.request.path.split('/').splice(1,1).pop()
@@ -31,8 +34,9 @@ async function normalroute(ctx, next) {
             }
         }
         if (key in proxymap) {
-            ctx.info('service-forward', key)
             await koaConnect(proxymap[key])(ctx, next)
+            ctx.__yaaf.delta = new Date().getTime() - ctx.__yaaf.timestamp
+            ctx.info('yaaf-gateway-end', ctx.__yaaf)
         } else {
             ctx.status = 404
         }
@@ -50,6 +54,8 @@ task.start = ((addr)=>{
     task.api.use(async (ctx, next) => {
         const host = ctx.gradation && ctx.config.gradation ? ctx.config.gradation.host : '127.0.0.1'
         const key = `${host}${ctx.request.path}`
+        ctx.__yaaf = {url: ctx.request.path, host, reqsequence: reqsequence++, timestamp: new Date().getTime()}
+        ctx.info('yaaf-gateway-req', ctx.__yaaf)
         if ((!(key in serviceMap)) && (ctx.request.path in cfgServiceMap)) {
             serviceMap[key] = httpProxy(ctx.request.path, {
                 target: ctx.config.gradation ? cfgServiceMap[ctx.request.path][1].replace(/[\d.]+/, host) : cfgServiceMap[ctx.request.path][1], 
@@ -65,8 +71,9 @@ task.start = ((addr)=>{
             })    
         }
         if (key in serviceMap) {
-            ctx.info('route-forward', key)
             await koaConnect(serviceMap[key])(ctx, next)
+            ctx.__yaaf.delta = new Date().getTime() - ctx.__yaaf.timestamp
+            ctx.info('yaaf-gateway-end', ctx.__yaaf)
         } else await next()
     })
     task.api.use(normalroute)
