@@ -20,7 +20,7 @@ async function normalroute(ctx, next) {
             const servicename = ctx.request.path.split('/').splice(1,1).pop()
             if (servicename && task.config[servicename] && task.config[servicename].port) {
                 proxymap[ctx.request.path] = httpProxy(ctx.request.path, {
-                    target: `http://${host}:${task.config[servicename].port}`, 
+                    target: `http://${host}:${task.config[servicename].port}${ctx.request.path}`, 
                     changeOrigin: true,
                     onError: (err, req, res)=>{
                         res.writeHead(501, {
