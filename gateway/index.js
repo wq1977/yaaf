@@ -15,33 +15,29 @@ async function normalroute(ctx, next) {
     const key = `${host}${ctx.request.path}`
     ctx.__yaaf = {url: ctx.request.path, host, reqsequence: reqsequence++, timestamp: new Date().getTime()}
     ctx.info('yaaf-gateway-req', ctx.__yaaf)
-    if (!(key in serviceMap)) {
-        if (!(key in proxymap)) {
-            const servicename = ctx.request.path.split('/').splice(1,1).pop()
-            if (servicename && task.config[servicename] && task.config[servicename].port) {
-                proxymap[ctx.request.path] = httpProxy(ctx.request.path, {
-                    target: `http://${host}:${task.config[servicename].port}`, 
-                    changeOrigin: true,
-                    onError: (err, req, res)=>{
-                        res.writeHead(501, {
-                            'Content-Type': 'text/plain'
-                        })
-                        res.end(
-                            'Something went wrong. And we are reporting a custom error message.'
-                        )
-                    }    
-                })    
-            }
+    if (!(key in proxymap)) {
+        const servicename = ctx.request.path.split('/').splice(1,1).pop()
+        if (servicename && task.config[servicename] && task.config[servicename].port) {
+            proxymap[key] = httpProxy(ctx.request.path, {
+                target: `http://${host}:${task.config[servicename].port}`, 
+                changeOrigin: true,
+                onError: (err, req, res)=>{
+                    res.writeHead(501, {
+                        'Content-Type': 'text/plain'
+                    })
+                    res.end(
+                        'Something went wrong. And we are reporting a custom error message.'
+                    )
+                }    
+            })    
         }
-        if (key in proxymap) {
-            await koaConnect(proxymap[key])(ctx, next)
-            ctx.__yaaf.delta = new Date().getTime() - ctx.__yaaf.timestamp
-            ctx.info('yaaf-gateway-end', ctx.__yaaf)
-        } else {
-            ctx.status = 404
-        }
+    }
+    if (key in proxymap) {
+        await koaConnect(proxymap[key])(ctx, next)
+        ctx.__yaaf.delta = new Date().getTime() - ctx.__yaaf.timestamp
+        ctx.info('yaaf-gateway-end', ctx.__yaaf)
     } else {
-        await next()
+        ctx.status = 404
     }
 }
 
