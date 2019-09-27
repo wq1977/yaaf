@@ -31,6 +31,7 @@ async function normalroute(ctx, next) {
             }
         }
         if (key in proxymap) {
+            ctx.info('service-forward', key)
             await koaConnect(proxymap[key])(ctx, next)
         } else {
             ctx.status = 404
@@ -64,6 +65,7 @@ task.start = ((addr)=>{
             })    
         }
         if (key in serviceMap) {
+            ctx.info('route-forward', key)
             await koaConnect(serviceMap[key])(ctx, next)
         } else await next()
     })
