@@ -112,6 +112,8 @@ async function logRequest(ctx, next) {
         method: ctx.req.method,
         path: ctx.req.url,
         remoteip: ctx.remoteip,
+        appname: ctx.req.headers['x-appname'] || '-',
+        version: ctx.req.headers['x-api-version'] || '-',
         requestbody: ctx.request.body || '-'
     })
     await next();
