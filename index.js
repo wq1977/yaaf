@@ -67,7 +67,7 @@ class Task{
             use: (func, rule)=>{
                 const CronJob = require('cron').CronJob;
                 this.crons.push(new CronJob(rule, func.bind(this,this)));
-                func.bind(this,this)();
+                // func.bind(this,this)();
             },
             start: ()=>{
                 this.crons.forEach((task)=>{
