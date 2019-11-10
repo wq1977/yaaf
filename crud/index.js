@@ -101,7 +101,7 @@ function R(tablename, optsroot) {
             if (p.startsWith('_')) return
             let value = ctx.request.body[p]
             if (value === "not null") {
-                query.push(`${symbolname[p] || p} is not null`)
+                query.push(`${symbolname[p] || '`' + p + '`'} is not null`)
             } else {
                 let value = ctx.request.body[p]
                 if (p.endsWith('id')) {
@@ -112,7 +112,7 @@ function R(tablename, optsroot) {
                     }
                 }
                 const symbolp = symbol[p] || '='
-                query.push(`${symbolname[p] || p} ${symbolp} ${ symbolp === 'in' ? '(?)' : '?'}`)
+                query.push(`${symbolname[p] || '`' + p + '`'} ${symbolp} ${ symbolp === 'in' ? '(?)' : '?'}`)
                 values.push(value)
             }
         })
