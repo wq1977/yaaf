@@ -96,6 +96,10 @@ function R(tablename, optsroot) {
             query.push('deleteat is null')
         }
 
+        if ('_query' in ctx.request.body) {
+            query.push(`(${ctx.request.body['_query']})`)
+        }
+
         Object.keys(ctx.request.body).forEach(p=>{
             if (['page', 'perPage', 'opts'].indexOf(p) >= 0) return
             if (p.startsWith('_')) return
